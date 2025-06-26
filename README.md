@@ -111,14 +111,7 @@ const initialState = {
 const counterSlice = createSlice({
   name: "counter",
   initialState,
-  reducers: {
-    increment: (state) => {
-      state.count += 1;
-    },
-    decrement: (state) => {
-      state.count -= 1;
-    },
-  },
+  reducers: {},
 });
 
 export default counterSlice.reducer;
@@ -126,9 +119,9 @@ export default counterSlice.reducer;
 
 ---
 
-## 🔗 Add the Reducer to the Store
+## 🔗8. Add the Reducer to the Store
 
-Update `store.ts` to include the counter slice:
+Update `store.ts` to include the counterSlice.ts:
 
 ```ts
 // src/redux/store.ts
@@ -142,7 +135,7 @@ export const store = configureStore({
 });
 ```
 
-Now, in Redux DevTools, you should see the following under state:
+✅In Redux DevTools, your state should now look like:
 
 ```json
 {
@@ -150,4 +143,180 @@ Now, in Redux DevTools, you should see the following under state:
     "count": 0
   }
 }
+```
+
+## 9. Adding our business logic in reducers. This is our action.
+
+```ts
+import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = {
+  count: 0,
+};
+
+const counterSlice = createSlice({
+  name: "counter",
+  initialState,
+  reducers: {
+    increment: (state) => {
+      state.count = state.count + 1;
+    },
+    decrement: (state) => {
+      state.count = state.count - 1;
+    },
+  },
+});
+
+export const { increment, decrement } = counterSlice.actions;
+
+export default counterSlice.reducer;
+```
+
+> Why counterSlice.reducer and not counterSlice.reducers?
+
+Because:
+
+`reducers` (plural) is just your input — an object containing individual reducer functions.
+
+`reducer` (singular) is the output — a single function Redux uses to manage that slice of state.
+
+## 10. Add types in store.ts
+
+```ts
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+## 11. Create Typed Redux Hooks
+
+Create `src/redux/hook.ts`:
+
+```ts
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "./store";
+
+export const useAppSelector = useSelector.withTypes<RootState>();
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+```
+
+These typed hooks will provide full TypeScript support when using Redux in components.
+
+## 12. Use Redux State and Actions in React Components
+
+```ts
+// src/App.tsx
+// import { useDispatch } from "react-redux";
+import { decrement, increment } from "./redux/features/counter/counterSlice";
+// import type { RootState } from "./redux/store";
+import { useAppDispatch, useAppSelector } from "./redux/hook";
+
+function App() {
+  // const counter = useSelector((state) => state.counter);
+  // console.log(counter);
+
+  // const { count } = useSelector((state: RootState) => state.counter);
+  const { count } = useAppSelector((state) => state.counter);
+  // console.log(count);
+  // const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+
+  const handleIncrement = () => {
+    dispatch(increment()); //make sure to call the increment function
+  };
+
+  const handleDecrement = () => {
+    dispatch(decrement());
+  };
+
+  return (
+    <>
+      <h1>Counter With Redux</h1>
+      <button aria-label="Increment value" onClick={handleIncrement}>
+        Increment
+      </button>
+      <div>{count}</div>
+      <button aria-label="Decrement value" onClick={handleDecrement}>
+        Decrement
+      </button>
+    </>
+  );
+}
+
+export default App;
+```
+
+## 13. Make Actions Dynamic with Payloads
+
+Update counterSlice.ts to accept payloads for increment/decrement, so that we can increment/decrement not just 1, but any number we want:
+
+let's update our counterSlice.ts
+
+```ts
+// src/redux/features/counter/counterSlice.ts
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+const initialState = {
+  count: 0,
+};
+
+const counterSlice = createSlice({
+  name: "counter",
+  initialState,
+  reducers: {
+    increment: (state, action: PayloadAction<number>) => {
+      state.count += action.payload;
+    },
+    decrement: (state, action: PayloadAction<number>) => {
+      state.count -= action.payload;
+    },
+  },
+});
+
+export const { increment, decrement } = counterSlice.actions;
+export default counterSlice.reducer;
+```
+
+Now your actions are flexible and can take dynamic values like 1, 5, or any number.
+
+let's update our `App.tsx` again for final touch.
+
+```ts
+import { decrement, increment } from "./redux/features/counter/counterSlice";
+
+import { useAppDispatch, useAppSelector } from "./redux/hook";
+
+function App() {
+  const { count } = useAppSelector((state) => state.counter);
+
+  const dispatch = useAppDispatch();
+
+  const handleIncrement = (amount: number) => {
+    dispatch(increment(amount)); //make sure to call the increment function
+  };
+
+  const handleDecrement = (amount: number) => {
+    dispatch(decrement(amount));
+  };
+
+  return (
+    <>
+      <h1>Counter With Redux</h1>
+      <button aria-label="Increment value" onClick={() => handleIncrement(1)}>
+        Increment
+      </button>
+      <button
+        aria-label="Increment value by 5"
+        onClick={() => handleIncrement(5)}
+      >
+        Increment value by 5
+      </button>
+      <div>{count}</div>
+      <button aria-label="Decrement value" onClick={() => handleDecrement(1)}>
+        Decrement
+      </button>
+    </>
+  );
+}
+
+export default App;
 ```
