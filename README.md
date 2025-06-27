@@ -9,7 +9,7 @@ A simple counter application built using **React**, **Redux Toolkit**, **TypeScr
 ### 1. Create a Vite + React App
 
 ```bash
-npm create vite@latest redux-counter-app -- --template react
+npm create vite@latest redux-counter-app -- --template react-ts
 ```
 
 Replace `redux-counter-app` with your desired project name. When prompted which language to use, you can select typescript.
