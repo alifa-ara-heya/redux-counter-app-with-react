@@ -48,7 +48,7 @@ npm install @reduxjs/toolkit react-redux
 
 ### 5. Create the Redux Store
 
-Create a file named `src/app/store.ts`. Import the `configureStore` API from Redux Toolkit. We'll start by creating an empty Redux store, and exporting it:
+Create a file named `src/redux/store.ts`. Import the `configureStore` API from Redux Toolkit. We'll start by creating an empty Redux store, and exporting it:
 
 ```ts
 // src/redux/store.ts
