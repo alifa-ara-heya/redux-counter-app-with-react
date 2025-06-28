@@ -147,6 +147,8 @@ export const store = configureStore({
 
 ## 9. Adding our business logic in reducers. This is our action.
 
+update `counterSlice.ts`
+
 ```ts
 import { createSlice } from "@reduxjs/toolkit";
 
