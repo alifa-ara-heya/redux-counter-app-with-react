@@ -322,3 +322,68 @@ function App() {
 
 export default App;
 ```
+
+## 🧩 14. Redux Middleware – Logger
+
+In this section, we're adding a **custom middleware** to our Redux store to **log every action dispatched** and view the state before and after the action is applied. This is helpful for debugging and understanding how state changes in your app.
+
+---
+
+### 📂 Create `redux/middlewares/logger.ts`
+
+```ts
+// currying concept
+
+const logger = (state) => (next) => (action) => {
+    console.group(action.type); // Start a collapsible console group with action type
+    console.info('previous state', state.getState()); // Log the previous state
+    const result = next(action); // Call the next middleware or reducer
+    console.info('next state', state.getState()); // Log the updated state
+    console.groupEnd(); // End the console group
+    return result; // Return the result of next(action)
+}
+
+export default logger;
+```
+
+---
+
+### ✅ What This Middleware Does
+
+This is a **logger middleware** created using **function currying**. Here's how it works:
+
+1. `logger(state)` — receives the `store` object as `state`.
+2. Returns a function that takes `next`, the next middleware in the chain (or the reducer).
+3. That returns another function which finally takes the dispatched `action`.
+
+Every time you dispatch an action, it:
+
+* Logs the **action type**.
+* Shows the **state before** the action.
+* Passes the action to the next middleware/reducer using `next(action)`.
+* Logs the **state after** the action has been processed.
+* Groups these logs under the action type for cleaner console output.
+
+---
+
+### 🧪 Add it to `store.ts`
+
+```ts
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from './features/counter/counterSlice';
+import logger from "./middlewares/logger";
+
+export const store = configureStore({
+    reducer: {
+        counter: counterReducer
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(logger) // Add logger after default middleware
+});
+```
+
+---
+
+### 💡 Why Use It?
+
+This middleware helps you **see what’s happening under the hood** of your Redux store, making it easier to debug state changes during development.
